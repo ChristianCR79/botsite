@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/webhook", "destination": "/api/webhook" }
+  ],
+  "functions": {
+    "api/webhook.js": {
+      "maxDuration": 30
+    }
+  }
+}
