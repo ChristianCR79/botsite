@@ -361,10 +361,12 @@ const SITE_DATA = {
   hero: {
     eyebrow: "Willkommen",
     headline: "Guten Morgen, München.",
-    subline: "Frisch gebacken. Täglich neu. Immer herzlich."
+    subline: "Frisch gebacken. Täglich neu. Immer herzlich.",
+    image: ""
   },
   about: {
-    text: "Wir sind das Café Sonntagskind – ein kleines, feines Café im Herzen Münchens. Seit 2018 verwöhnen wir unsere Gäste mit hausgemachten Kuchen, frischen Sandwiches und dem besten Filterkaffee der Stadt. Alles frisch, alles mit Liebe gemacht."
+    text: "Wir sind das Café Sonntagskind – ein kleines, feines Café im Herzen Münchens. Seit 2018 verwöhnen wir unsere Gäste mit hausgemachten Kuchen, frischen Sandwiches und dem besten Filterkaffee der Stadt. Alles frisch, alles mit Liebe gemacht.",
+    image: ""
   },
   hours: {
     monday:    "07:00 – 18:00",
@@ -444,6 +446,13 @@ const SITE_DATA = {
   document.getElementById('about-text').textContent  = d.about.text;
   document.getElementById('about-quote').textContent = `"${d.business.tagline}"`;
   document.getElementById('about-attr').textContent  = d.business.name;
+  // Bild falls vorhanden
+  if (d.about.image) {
+    const el = document.getElementById('about-visual');
+    el.style.backgroundImage = `url(${d.about.image})`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  }
 
   // ── Hours
   const hoursGrid = document.getElementById('hours-grid');
