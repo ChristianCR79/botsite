@@ -273,9 +273,25 @@ export default async function handler(req, res) {
   const emailData = payload?.data ?? payload; // Fallback falls kein "data"-Wrapper
 
   // ── E-Mail-Felder extrahieren ───────────────────────────────────────
-  const sender    = emailData?.from || '';
-  const subject   = emailData?.subject || '(Kein Betreff)';
-  const emailBody = emailData?.text || emailData?.['body-plain'] || '';
+  const sender  = emailData?.from || '';
+  const subject = emailData?.subject || '(Kein Betreff)';
+
+  // Plain-Text bevorzugen, HTML als Fallback (iCloud sendet oft nur HTML)
+  let emailBody = emailData?.text || emailData?.['body-plain'] || '';
+  if (!emailBody && (emailData?.html || emailData?.['body-html'])) {
+    const html = emailData?.html || emailData?.['body-html'] || '';
+    // HTML-Tags entfernen → Plain Text
+    emailBody = html
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
 
   if (!sender) {
     console.warn('[botsite] Kein Absender in Webhook');
