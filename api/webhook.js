@@ -268,36 +268,41 @@ export default async function handler(req, res) {
   }
 
   // ── Resend Webhook-Payload (JSON) ──────────────────────────────────
-  const payload = req.body;
-  // DEBUG: Payload-Struktur loggen
-  console.log('[botsite] Payload keys:', Object.keys(payload || {}));
-  console.log('[botsite] Payload type:', payload?.type);
-  if (payload?.data) {
-    console.log('[botsite] data keys:', Object.keys(payload.data));
-    console.log('[botsite] text:', JSON.stringify(payload.data.text)?.substring(0, 100));
-    console.log('[botsite] html:', JSON.stringify(payload.data.html)?.substring(0, 100));
-  }
+  // Resend sendet nur Metadaten im Webhook – den vollen E-Mail-Inhalt
+  // holen wir über die Resend API nach (via email_id)
+  const payload   = req.body;
   const emailData = payload?.data ?? payload;
 
   // ── E-Mail-Felder extrahieren ───────────────────────────────────────
-  const sender  = emailData?.from || '';
-  const subject = emailData?.subject || '(Kein Betreff)';
+  const sender   = emailData?.from || '';
+  const subject  = emailData?.subject || '(Kein Betreff)';
+  const emailId  = emailData?.email_id;
 
-  // Plain-Text bevorzugen, HTML als Fallback (iCloud sendet oft nur HTML)
+  // ── Vollen E-Mail-Text via Resend API holen ─────────────────────────
   let emailBody = emailData?.text || emailData?.['body-plain'] || '';
-  if (!emailBody && (emailData?.html || emailData?.['body-html'])) {
-    const html = emailData?.html || emailData?.['body-html'] || '';
-    // HTML-Tags entfernen → Plain Text
-    emailBody = html
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+  if (!emailBody && emailId) {
+    try {
+      const apiRes = await fetch(`https://api.resend.com/emails/${emailId}`, {
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+      });
+      if (apiRes.ok) {
+        const full = await apiRes.json();
+        emailBody = full.text || '';
+        // HTML-Fallback: Tags entfernen
+        if (!emailBody && full.html) {
+          emailBody = full.html
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<\/p>/gi, '\n')
+            .replace(/<[^>]+>/g, '')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+        }
+        console.log('[botsite] E-Mail-Text via API geladen:', emailBody.substring(0, 80));
+      }
+    } catch (e) {
+      console.error('[botsite] Resend API Fehler:', e.message);
+    }
   }
 
   if (!sender) {
