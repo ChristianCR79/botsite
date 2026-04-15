@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="" id="meta-description" />
+  <title id="page-title">Café</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── DESIGN TOKENS ─────────────────────────────────────── */
+    :root {
+      --brown-dark:   #2c1a0e;
+      --brown:        #4a2c0a;
+      --gold:         #c9922a;
+      --gold-light:   #e8b86d;
+      --cream:        #fdf6ee;
+      --white:        #ffffff;
+      --text:         #2d2010;
+      --text-muted:   #7a6650;
+      --serif:        'Playfair Display', Georgia, serif;
+      --sans:         'Inter', system-ui, sans-serif;
+      --max-w:        1100px;
+      --radius:       14px;
+      --shadow:       0 2px 16px rgba(44,26,14,0.08);
+    }
+
+    /* ── RESET ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); color: var(--text); background: var(--cream); line-height: 1.65; }
+    img  { max-width: 100%; display: block; }
+
+    /* ── NAVIGATION ─────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--brown-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      font-family: var(--serif); color: var(--gold-light);
+      font-size: 1.2rem; font-weight: 700; text-decoration: none;
+    }
+    .nav-links { list-style: none; display: flex; gap: 2rem; }
+    .nav-links a {
+      color: rgba(255,255,255,0.75); text-decoration: none;
+      font-size: 0.88rem; font-weight: 500; letter-spacing: 0.02em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold-light); }
+
+    /* ── HERO ───────────────────────────────────────────────── */
+    .hero {
+      background: var(--brown-dark);
+      background-image:
+        radial-gradient(ellipse at 75% 50%, rgba(201,146,42,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 10% 90%, rgba(74,44,10,0.6) 0%, transparent 50%);
+      color: var(--white);
+      padding: 7rem 2rem 6rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before, .hero::after {
+      content: ''; position: absolute; border-radius: 50%; pointer-events: none;
+    }
+    .hero::before {
+      width: 700px; height: 700px;
+      border: 1px solid rgba(201,146,42,0.15);
+      top: -150px; right: -150px;
+    }
+    .hero::after {
+      width: 450px; height: 450px;
+      background: rgba(201,146,42,0.06);
+      bottom: -120px; left: -80px;
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+    .eyebrow {
+      font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.6rem, 6vw, 4.8rem);
+      line-height: 1.12; margin-bottom: 1.5rem;
+    }
+    .hero-sub { font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 2.75rem; }
+    .btn {
+      display: inline-block; padding: 0.9rem 2.2rem;
+      border-radius: 50px; font-weight: 600; font-size: 0.92rem;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .btn-gold { background: var(--gold); color: var(--brown-dark); }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,146,42,0.4); }
+    .btn-outline { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,0.4); margin-left: 0.75rem; }
+    .btn-outline:hover { border-color: var(--gold-light); color: var(--gold-light); }
+
+    /* ── SECTION BASE ───────────────────────────────────────── */
+    section { padding: 5.5rem 2rem; }
+    .container { max-width: var(--max-w); margin: 0 auto; }
+    .section-label {
+      font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.6rem; font-weight: 600;
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      color: var(--brown-dark); margin-bottom: 1rem; line-height: 1.2;
+    }
+    .section-sub { color: var(--text-muted); max-width: 560px; margin-bottom: 3rem; }
+
+    /* ── ANNOUNCEMENTS ──────────────────────────────────────── */
+    .section-announcements { background: #fff9f0; border-top: 3px solid var(--gold); }
+    .ann-card {
+      background: var(--white); border-left: 4px solid var(--gold);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1.25rem 1.75rem; margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .ann-card h3 { font-weight: 600; color: var(--brown); margin-bottom: 0.3rem; }
+    .ann-card p { color: var(--text-muted); font-size: 0.93rem; }
+
+    /* ── ABOUT ──────────────────────────────────────────────── */
+    .section-about { background: var(--white); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4.5rem; align-items: center; }
+    .about-text { font-size: 1.05rem; line-height: 1.85; color: var(--text-muted); margin-top: 0.5rem; }
+    .about-visual {
+      background: var(--brown-dark); border-radius: var(--radius);
+      padding: 3rem 2.5rem; color: var(--white); text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .about-visual::before {
+      content: ''; position: absolute; width: 300px; height: 300px;
+      border-radius: 50%; background: rgba(201,146,42,0.07);
+      top: -80px; right: -80px;
+    }
+    .about-quote {
+      font-family: var(--serif); font-style: italic;
+      font-size: 1.6rem; color: var(--gold-light);
+      line-height: 1.45; margin-bottom: 1.5rem; position: relative; z-index: 1;
+    }
+    .about-attribution { color: rgba(255,255,255,0.4); font-size: 0.85rem; position: relative; z-index: 1; }
+
+    /* ── HOURS ──────────────────────────────────────────────── */
+    .section-hours { background: var(--cream); }
+    .hours-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.75rem; margin-top: 0.5rem;
+    }
+    .hour-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.4rem 0.75rem; text-align: center;
+      border: 1px solid rgba(44,26,14,0.07); box-shadow: var(--shadow);
+    }
+    .hour-day { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.65rem; font-weight: 600; }
+    .hour-time { font-family: var(--serif); font-size: 0.95rem; font-weight: 700; color: var(--brown-dark); }
+    .hour-card.today { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,146,42,0.2); }
+    .hour-card.today .hour-day { color: var(--gold); }
+    .hour-card.closed .hour-time { color: #ccc; }
+
+    /* ── MENU ───────────────────────────────────────────────── */
+    .section-menu { background: var(--white); }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.75rem;
+    }
+    .menu-category {
+      background: var(--cream); border-radius: var(--radius);
+      padding: 2rem; border: 1px solid rgba(44,26,14,0.06);
+    }
+    .menu-cat-title {
+      font-family: var(--serif); font-size: 1.25rem; color: var(--brown-dark);
+      margin-bottom: 1.5rem; padding-bottom: 0.85rem;
+      border-bottom: 2px solid var(--gold);
+    }
+    .menu-item {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 1rem;
+      margin-bottom: 1rem; padding-bottom: 1rem;
+      border-bottom: 1px dashed rgba(44,26,14,0.1);
+    }
+    .menu-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .menu-item-info { flex: 1; }
+    .menu-item-name { font-weight: 600; color: var(--brown); margin-bottom: 0.2rem; font-size: 0.95rem; }
+    .menu-item-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .menu-item-price { font-weight: 700; color: var(--gold); white-space: nowrap; font-family: var(--serif); font-size: 0.95rem; }
+
+    /* ── SPECIALS ───────────────────────────────────────────── */
+    .section-specials {
+      background: var(--brown-dark);
+      background-image: radial-gradient(ellipse at 80% 20%, rgba(201,146,42,0.12) 0%, transparent 60%);
+    }
+    .section-specials .section-title { color: var(--gold-light); }
+    .specials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .special-card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(201,146,42,0.25);
+      border-radius: var(--radius); padding: 2rem;
+      transition: border-color 0.2s;
+    }
+    .special-card:hover { border-color: rgba(201,146,42,0.5); }
+    .special-card h3 { font-family: var(--serif); color: var(--gold-light); font-size: 1.3rem; margin-bottom: 0.75rem; }
+    .special-card p { color: rgba(255,255,255,0.7); line-height: 1.75; font-size: 0.95rem; }
+
+    /* ── CONTACT ────────────────────────────────────────────── */
+    .section-contact { background: var(--cream); }
+    .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+    .contact-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 2rem; text-align: center;
+      border: 1px solid rgba(44,26,14,0.07); box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .contact-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(44,26,14,0.12); }
+    .contact-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .contact-card h3 { font-family: var(--serif); color: var(--brown-dark); margin-bottom: 0.6rem; font-size: 1.1rem; }
+    .contact-card p, .contact-card a { color: var(--text-muted); text-decoration: none; font-size: 0.93rem; line-height: 1.7; }
+    .contact-card a:hover { color: var(--gold); }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      background: var(--brown-dark); color: rgba(255,255,255,0.5);
+      text-align: center; padding: 2.5rem 2rem; font-size: 0.85rem;
+    }
+    footer strong { color: var(--gold-light); }
+    footer .botsite-badge { margin-top: 0.6rem; font-size: 0.72rem; opacity: 0.4; }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .hours-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      nav { justify-content: center; }
+      section { padding: 3.5rem 1.25rem; }
+      .hours-grid { grid-template-columns: repeat(2, 1fr); }
+      .btn-outline { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="#home" class="nav-logo" id="nav-logo">Café</a>
+  <ul class="nav-links">
+    <li><a href="#about">Über uns</a></li>
+    <li><a href="#hours">Öffnungszeiten</a></li>
+    <li><a href="#menu">Speisekarte</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-inner">
+    <p class="eyebrow" id="hero-eyebrow"></p>
+    <h1 id="hero-headline"></h1>
+    <p class="hero-sub" id="hero-subline"></p>
+    <a href="#menu" class="btn btn-gold">Speisekarte entdecken</a>
+    <a href="#contact" class="btn btn-outline">Kontakt</a>
+  </div>
+</section>
+
+<!-- ANNOUNCEMENTS (wird ausgeblendet wenn leer) -->
+<section class="section-announcements" id="section-announcements" style="display:none;">
+  <div class="container">
+    <p class="section-label">Aktuell</p>
+    <h2 class="section-title">Neuigkeiten</h2>
+    <div id="announcements-list"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section-about" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div>
+        <p class="section-label">Über uns</p>
+        <h2 class="section-title" id="about-name"></h2>
+        <p class="about-text" id="about-text"></p>
+      </div>
+      <div class="about-visual">
+        <p class="about-quote" id="about-quote"></p>
+        <p class="about-attribution">— <span id="about-attr"></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOURS -->
+<section class="section-hours" id="hours">
+  <div class="container">
+    <p class="section-label">Täglich für Sie da</p>
+    <h2 class="section-title">Öffnungszeiten</h2>
+    <div class="hours-grid" id="hours-grid"></div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="section-menu" id="menu">
+  <div class="container">
+    <p class="section-label">Frisch & hausgemacht</p>
+    <h2 class="section-title">Unsere Speisekarte</h2>
+    <p class="section-sub" id="menu-sub"></p>
+    <div class="menu-grid" id="menu-grid"></div>
+  </div>
+</section>
+
+<!-- SPECIALS (wird ausgeblendet wenn keine aktiven) -->
+<section class="section-specials" id="section-specials" style="display:none;">
+  <div class="container">
+    <p class="section-label">Das Besondere</p>
+    <h2 class="section-title">Highlights & Specials</h2>
+    <div class="specials-grid" id="specials-grid"></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section-contact" id="contact">
+  <div class="container">
+    <p class="section-label">So erreichen Sie uns</p>
+    <h2 class="section-title">Kontakt & Anfahrt</h2>
+    <div class="contact-grid" id="contact-grid"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© <span id="footer-year"></span> <strong id="footer-name"></strong>
+     · <span id="footer-address"></span></p>
+  <p class="botsite-badge">Betreut von Botsite – KI-Website-Betreuung via E-Mail</p>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// @SITE_DATA_START
+const SITE_DATA = {
+  meta: {
+    title: "Café Sonntagskind – München",
+    description: "Frisch, hausgemacht, herzlich. Ihr Lieblingscafé am Marienplatz.",
+    website_url: "https://cafe-sonntagskind.de",
+    last_updated: "2026-04-15"
+  },
+  business: {
+    name: "Café Sonntagskind",
+    tagline: "Frisch. Hausgemacht. Herzlich."
+  },
+  contact: {
+    phone: "+49 89 123 456 78",
+    email: "info@cafe-sonntagskind.de",
+    address: {
+      street: "Marienplatz 5",
+      city: "80331 München"
+    }
+  },
+  hero: {
+    eyebrow: "Willkommen",
+    headline: "Guten Morgen, München.",
+    subline: "Frisch gebacken. Täglich neu. Immer herzlich."
+  },
+  about: {
+    text: "Wir sind das Café Sonntagskind – ein kleines, feines Café im Herzen Münchens. Seit 2018 verwöhnen wir unsere Gäste mit hausgemachten Kuchen, frischen Sandwiches und dem besten Filterkaffee der Stadt. Alles frisch, alles mit Liebe gemacht."
+  },
+  hours: {
+    monday:    "07:00 – 18:00",
+    tuesday:   "07:00 – 18:00",
+    wednesday: "07:00 – 18:00",
+    thursday:  "07:00 – 18:00",
+    friday:    "07:00 – 19:00",
+    saturday:  "08:00 – 19:00",
+    sunday:    "09:00 – 17:00"
+  },
+  menu: [
+    {
+      category: "☕ Frühstück",
+      items: [
+        { name: "Avocado Toast",         description: "Sauerteig, Avocado, Rucola, Cherrytomaten",        price: "8,90 €" },
+        { name: "Granola Bowl",          description: "Joghurt, Früchtemüsli, saisonale Beeren, Honig",   price: "7,50 €" },
+        { name: "Klassisches Frühstück", description: "2 Brötchen, Butter, Marmelade, Käse, Aufschnitt",  price: "6,90 €" }
+      ]
+    },
+    {
+      category: "🥗 Mittagskarte",
+      items: [
+        { name: "Tagessuppe",            description: "Täglich wechselnd, mit frischem Brot",             price: "5,90 €" },
+        { name: "Club Sandwich",         description: "Hähnchen, Speck, Tomaten, Salat, Hausmarinaise",   price: "9,50 €" },
+        { name: "Quiche des Tages",      description: "Hausgemacht, mit gemischtem Beilagensalat",        price: "8,90 €" }
+      ]
+    },
+    {
+      category: "🍰 Kuchen & Torten",
+      items: [
+        { name: "Apfel-Streusel-Kuchen", description: "Nach Omas Rezept, auf Wunsch warm mit Sahne",      price: "3,90 €" },
+        { name: "New York Cheesecake",   description: "Mit hausgemachter Erdbeer-Coulis",                 price: "4,50 €" },
+        { name: "Tageskuchen",           description: "Täglich wechselnd – einfach fragen!",              price: "ab 3,50 €" }
+      ]
+    },
+    {
+      category: "☕ Getränke",
+      items: [
+        { name: "Filterkaffee",          description: "Täglich frisch gemahlen, single origin",           price: "2,50 €" },
+        { name: "Cappuccino",            description: "Mit Hafermilch auf Wunsch (+0,50 €)",             price: "3,80 €" },
+        { name: "Frisch gepresster OJ",  description: "3 Orangen, kein Zucker",                          price: "4,50 €" }
+      ]
+    }
+  ],
+  specials: [
+    {
+      title: "April-Special 🍎",
+      description: "Unsere neue Apfel-Walnuss-Torte mit Karamell-Glasur ist da! Holen Sie sich ein Stück – am besten noch warm mit einer Kugel Vanilleeis.",
+      active: true
+    }
+  ],
+  announcements: []
+};
+// @SITE_DATA_END
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── RENDERER ─────────────────────────────────────────────────────────────────
+(function render() {
+  const d = SITE_DATA;
+  const today = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
+  const dayNames = { monday:'Montag', tuesday:'Dienstag', wednesday:'Mittwoch', thursday:'Donnerstag', friday:'Freitag', saturday:'Samstag', sunday:'Sonntag' };
+
+  // ── Meta
+  document.title = d.meta.title;
+  document.getElementById('meta-description').setAttribute('content', d.meta.description);
+
+  // ── Nav
+  document.getElementById('nav-logo').textContent = d.business.name;
+
+  // ── Hero
+  document.getElementById('hero-eyebrow').textContent = d.hero.eyebrow;
+  document.getElementById('hero-headline').textContent = d.hero.headline;
+  document.getElementById('hero-subline').textContent  = d.hero.subline;
+
+  // ── About
+  document.getElementById('about-name').textContent  = d.business.name;
+  document.getElementById('about-text').textContent  = d.about.text;
+  document.getElementById('about-quote').textContent = `"${d.business.tagline}"`;
+  document.getElementById('about-attr').textContent  = d.business.name;
+
+  // ── Hours
+  const hoursGrid = document.getElementById('hours-grid');
+  hoursGrid.innerHTML = Object.entries(dayNames).map(([key, label]) => {
+    const time    = d.hours[key] || 'Geschlossen';
+    const closed  = time.toLowerCase() === 'geschlossen';
+    const isToday = key === today;
+    return `<div class="hour-card${closed ? ' closed' : ''}${isToday ? ' today' : ''}">
+      <div class="hour-day">${label}</div>
+      <div class="hour-time">${time}</div>
+    </div>`;
+  }).join('');
+
+  // ── Menu
+  document.getElementById('menu-sub').textContent = 'Täglich frisch zubereitet – alles hausgemacht mit regionalen Zutaten.';
+  const menuGrid = document.getElementById('menu-grid');
+  menuGrid.innerHTML = d.menu.map(cat => `
+    <div class="menu-category">
+      <h3 class="menu-cat-title">${cat.category}</h3>
+      ${cat.items.map(item => `
+        <div class="menu-item">
+          <div class="menu-item-info">
+            <div class="menu-item-name">${item.name}</div>
+            <div class="menu-item-desc">${item.description}</div>
+          </div>
+          <div class="menu-item-price">${item.price}</div>
+        </div>`).join('')}
+    </div>`).join('');
+
+  // ── Specials
+  const activeSpecials = (d.specials || []).filter(s => s.active);
+  if (activeSpecials.length > 0) {
+    document.getElementById('section-specials').style.display = '';
+    document.getElementById('specials-grid').innerHTML = activeSpecials.map(s => `
+      <div class="special-card">
+        <h3>${s.title}</h3>
+        <p>${s.description}</p>
+      </div>`).join('');
+  }
+
+  // ── Announcements
+  const announcements = d.announcements || [];
+  if (announcements.length > 0) {
+    document.getElementById('section-announcements').style.display = '';
+    document.getElementById('announcements-list').innerHTML = announcements.map(a => `
+      <div class="ann-card">
+        <h3>${a.title}</h3>
+        <p>${a.text}</p>
+      </div>`).join('');
+  }
+
+  // ── Contact
+  document.getElementById('contact-grid').innerHTML = `
+    <div class="contact-card">
+      <div class="contact-icon">📍</div>
+      <h3>Adresse</h3>
+      <p>${d.contact.address.street}<br>${d.contact.address.city}</p>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">📞</div>
+      <h3>Telefon</h3>
+      <a href="tel:${d.contact.phone.replace(/\s/g,'')}">${d.contact.phone}</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">✉️</div>
+      <h3>E-Mail</h3>
+      <a href="mailto:${d.contact.email}">${d.contact.email}</a>
+    </div>
+    <div class="contact-card">
+      <div class="contact-icon">🕐</div>
+      <h3>Heute</h3>
+      <p>${d.hours[today] || 'Geschlossen'}</p>
+    </div>`;
+
+  // ── Footer
+  document.getElementById('footer-year').textContent    = new Date().getFullYear();
+  document.getElementById('footer-name').textContent    = d.business.name;
+  document.getElementById('footer-address').textContent = `${d.contact.address.street}, ${d.contact.address.city}`;
+})();
+</script>
+</body>
+</html>
