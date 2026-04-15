@@ -268,9 +268,16 @@ export default async function handler(req, res) {
   }
 
   // ── Resend Webhook-Payload (JSON) ──────────────────────────────────
-  // Resend sendet: { type: "email.received", data: { from, to, subject, text, ... } }
   const payload = req.body;
-  const emailData = payload?.data ?? payload; // Fallback falls kein "data"-Wrapper
+  // DEBUG: Payload-Struktur loggen
+  console.log('[botsite] Payload keys:', Object.keys(payload || {}));
+  console.log('[botsite] Payload type:', payload?.type);
+  if (payload?.data) {
+    console.log('[botsite] data keys:', Object.keys(payload.data));
+    console.log('[botsite] text:', JSON.stringify(payload.data.text)?.substring(0, 100));
+    console.log('[botsite] html:', JSON.stringify(payload.data.html)?.substring(0, 100));
+  }
+  const emailData = payload?.data ?? payload;
 
   // ── E-Mail-Felder extrahieren ───────────────────────────────────────
   const sender  = emailData?.from || '';
