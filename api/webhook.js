@@ -106,6 +106,43 @@ function replaceSiteData(html, newSiteDataBlock) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+// GITHUB: Bild hochladen (für E-Mail-Anhänge)
+// ════════════════════════════════════════════════════════════════════════
+async function githubUploadImage(filename, base64Content) {
+  const { GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO } = process.env;
+
+  // Sicherer Dateiname (Leerzeichen etc. entfernen)
+  const safeName  = filename.replace(/[^a-zA-Z0-9._-]/g, '_').toLowerCase();
+  const timestamp = Date.now();
+  const filePath  = `assets/images/${timestamp}_${safeName}`;
+  const url       = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
+
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization:  `token ${GITHUB_TOKEN}`,
+      Accept:         'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+      'User-Agent':   'Botsite-KI/1.0',
+    },
+    body: JSON.stringify({
+      message: `Botsite: Bild hochgeladen – ${safeName}`,
+      content: base64Content, // bereits Base64 von Resend
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`GitHub Bild-Upload ${res.status}: ${err}`);
+  }
+
+  // Öffentliche GitHub Pages URL
+  const pagesUrl = `https://${GITHUB_OWNER.toLowerCase()}.github.io/${GITHUB_REPO}/${filePath}`;
+  console.log(`[botsite] Bild hochgeladen: ${pagesUrl}`);
+  return { filePath, pagesUrl, safeName };
+}
+
+// ════════════════════════════════════════════════════════════════════════
 // RESEND: E-Mail senden
 // ════════════════════════════════════════════════════════════════════════
 async function sendEmail(to, subject, text) {
@@ -122,7 +159,7 @@ async function sendEmail(to, subject, text) {
 // ════════════════════════════════════════════════════════════════════════
 // CLAUDE: E-Mail verarbeiten und Entscheidung treffen
 // ════════════════════════════════════════════════════════════════════════
-async function processWithClaude(siteDataCode, senderEmail, emailSubject, emailBody) {
+async function processWithClaude(siteDataCode, senderEmail, emailSubject, emailBody, uploadedImages = []) {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const systemPrompt = `Du bist ${AI_NAME}, ein freundlicher und kompetenter KI-Website-Betreuer.
@@ -136,7 +173,7 @@ Du betreust die Website eines kleinen Unternehmens. Kunden schicken dir E-Mails 
 ═══ AKTIONSTYPEN ═══
 • ÄNDERUNG   – Klare, einfache Inhaltsänderung (Texte, Preise, Zeiten, Ankündigungen, Specials)
 • RÜCKFRAGE  – Anfrage ist unklar oder mehrdeutig → gezielt nachfragen
-• DATEIEN    – Änderung benötigt Fotos, Bilder oder Dateien vom Kunden
+• DATEIEN    – Änderung benötigt Fotos die noch nicht mitgeschickt wurden
 • KOMPLEX    – Strukturelle Änderungen, neues Design, neue Seiten (wird manuell besprochen)
 
 ═══ JSON-ANTWORTFORMAT ═══
@@ -160,6 +197,15 @@ Bei der email_response:
 • Bei ÄNDERUNG: bestätige die Änderung konkret, nenne die Website-URL
 • Unterzeichne immer mit "${AI_NAME}"`;
 
+  // Bilder-Abschnitt für Claude vorbereiten
+  const imagesSection = uploadedImages.length > 0
+    ? `\n━━━ HOCHGELADENE BILDER (bereits auf GitHub) ━━━\n` +
+      uploadedImages.map(img =>
+        `• ${img.safeName}\n  URL: ${img.pagesUrl}`
+      ).join('\n') +
+      `\n\nDiese Bild-URLs kannst du direkt in SITE_DATA verwenden (z.B. als "image"-Feld).`
+    : '';
+
   const userMessage = `Aktuelle SITE_DATA der Website:
 \`\`\`javascript
 ${siteDataCode}
@@ -169,7 +215,7 @@ ${siteDataCode}
 Von: ${senderEmail}
 Betreff: ${emailSubject}
 
-${emailBody}`;
+${emailBody}${imagesSection}`;
 
   const response = await anthropic.messages.create({
     model:      'claude-opus-4-5',
@@ -226,7 +272,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'No sender' });
   }
 
-  console.log(`[botsite] Neue E-Mail von ${sender} | Betreff: "${subject}"`);
+  // ── Anhänge (Bilder) aus Resend-Payload ────────────────────────────
+  const attachments = emailData?.attachments || [];
+  const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+  console.log(`[botsite] Neue E-Mail von ${sender} | Betreff: "${subject}" | Anhänge: ${attachments.length}`);
 
   // ── Hauptverarbeitung ───────────────────────────────────────────────
   try {
@@ -235,8 +285,24 @@ export default async function handler(req, res) {
     const siteDataCode = extractSiteData(html);
     console.log('[botsite] GitHub-Datei geladen, SHA:', sha.substring(0, 8));
 
-    // 2. Claude entscheiden lassen
-    const result = await processWithClaude(siteDataCode, sender, subject, emailBody);
+    // 2. Bilder-Anhänge zu GitHub hochladen
+    const uploadedImages = [];
+    for (const att of attachments) {
+      const isImage = IMAGE_TYPES.includes((att.contentType || '').toLowerCase());
+      if (!isImage) continue;
+      try {
+        const uploaded = await githubUploadImage(att.filename || 'bild.jpg', att.content);
+        uploadedImages.push(uploaded);
+      } catch (imgErr) {
+        console.error('[botsite] Bild-Upload fehlgeschlagen:', imgErr.message);
+      }
+    }
+    if (uploadedImages.length > 0) {
+      console.log(`[botsite] ${uploadedImages.length} Bild(er) hochgeladen`);
+    }
+
+    // 3. Claude entscheiden lassen (inkl. Bild-URLs)
+    const result = await processWithClaude(siteDataCode, sender, subject, emailBody, uploadedImages);
     console.log(`[botsite] Claude-Entscheidung: ${result.action} | ${result.reasoning}`);
 
     // 3. Bei ÄNDERUNG: GitHub aktualisieren
