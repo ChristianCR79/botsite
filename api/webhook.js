@@ -197,10 +197,6 @@ Bei der email_response:
 • Bei ÄNDERUNG: bestätige die Änderung konkret, nenne die Website-URL
 • Unterzeichne immer mit "${AI_NAME}"`;
 
-  // Wenn kein Body: Betreff als Anweisung verwenden
-  const effectiveBody = emailBody.trim()
-    || `[Anweisung im Betreff]: ${subject}`;
-
   // Bilder-Abschnitt für Claude vorbereiten
   const imagesSection = uploadedImages.length > 0
     ? `\n━━━ HOCHGELADENE BILDER (bereits auf GitHub) ━━━\n` +
@@ -342,6 +338,9 @@ export default async function handler(req, res) {
     if (uploadedImages.length > 0) {
       console.log(`[botsite] ${uploadedImages.length} Bild(er) hochgeladen`);
     }
+
+    // Wenn kein Body: Betreff als Anweisung verwenden
+    const effectiveBody = emailBody.trim() || `[Anweisung im Betreff]: ${subject}`;
 
     // 3. Claude entscheiden lassen (inkl. Bild-URLs)
     const result = await processWithClaude(siteDataCode, sender, subject, effectiveBody, uploadedImages);
