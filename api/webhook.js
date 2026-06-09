@@ -218,7 +218,7 @@ Betreff: ${emailSubject}
 ${emailBody}${imagesSection}`;
 
   const response = await anthropic.messages.create({
-    model:      'claude-opus-4-5',
+    model:      'claude-sonnet-4-6',
     max_tokens: 4096,
     system:     systemPrompt,
     messages:   [{ role: 'user', content: userMessage }],
@@ -252,6 +252,15 @@ ${emailBody}${imagesSection}`;
 // MAIN HANDLER
 // ════════════════════════════════════════════════════════════════════════
 export default async function handler(req, res) {
+  // ── MAINTENANCE MODE ──────────────────────────────────────────────────
+  // Auf true setzen um den Bot komplett zu deaktivieren (keine E-Mails, keine GitHub-Updates)
+  const MAINTENANCE_MODE = true;
+  if (MAINTENANCE_MODE) {
+    console.log('[botsite] Maintenance Mode aktiv – Webhook ignoriert');
+    return res.status(200).json({ status: 'maintenance' });
+  }
+  // ─────────────────────────────────────────────────────────────────────
+
   // CORS-Header für Browser-Test-Seite
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
